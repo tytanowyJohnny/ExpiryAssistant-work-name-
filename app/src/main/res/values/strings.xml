@@ -1,0 +1,28 @@
+<resources>
+    <string name="app_name">Expiry Assistant</string>
+
+    <!-- Settings -->
+    <string name="action_settings">Settings</string>
+
+    <!-- New Product Dialog -->
+    <string name="new_product_dialog_title">New item</string>
+    <string name="new_product_dialog_header">Type new product name and expiration date</string>
+
+    <!-- Edit Product Dialog -->
+    <string name="edit_product_dialog_title">Edit item</string>
+    <string name="edit_product_dialog_header">Type new product name or expiration date</string>
+
+    <string name="new_product_dialog_label_product">Product name</string>
+    <string name="new_product_dialog_label_expiration">Expiration date</string>
+
+    <string name="new_product_dialog_hint_product">Example: Milk, Bread etc.</string>
+    <string name="new_product_dialog_hint_expiration">dd/mm/yyyy</string>
+
+    <!-- Toolbar2 labels -->
+    <string name="toolbar2_product_name_label">Product name</string>
+    <string name="toolbar2_product_expiry_label">Expiry date</string>
+
+    <!-- Empty row text -->
+    <string name="empty_row_text">There are no products on your expiry list</string>
+
+</resources>

@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="colorPrimary">#dcedc8</color>
+    <color name="colorPrimaryDark">#aabb97</color>
+    <color name="colorAccent">#dcedc8</color>
+
+    <!-- Fonts -->
+    <color name="fontColorPrimary">#000000</color>
+    <color name="fontColorTextInputLayout">#b71c1c</color>
+    <color name="fontColorSingleRow">#616161</color>
+    <color name="fontColorSnackbar">#fafafa</color>
+
+</resources>
