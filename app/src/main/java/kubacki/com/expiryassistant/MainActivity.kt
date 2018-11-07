@@ -40,7 +40,10 @@ class MainActivity : AppCompatActivity(), ProductDialogFragment.ProductDialogLis
         setContentView(R.layout.activity_main)
         setSupportActionBar(toolbar)
 
-        // TODO: Create notification system which will monitor all products and notify if one of them is about to expire
+        /*
+        Schedule a job
+         */
+        
 
         // Add listener for Floating Action Button -> Show new product dialog
         addProductFab.setOnClickListener {
