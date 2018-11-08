@@ -1,6 +1,8 @@
 package kubacki.com.expiryassistant
 
+import android.app.NotificationManager
 import android.content.ContentValues
+import android.content.Context
 import android.os.Bundle
 import android.provider.BaseColumns
 import android.support.design.widget.Snackbar
@@ -8,15 +10,18 @@ import android.support.v4.content.res.ResourcesCompat
 import android.support.v7.app.AppCompatActivity
 import android.support.v7.widget.LinearLayoutManager
 import android.support.v7.widget.RecyclerView
+import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
 import android.widget.TextView
+import androidx.work.*
 
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.activity_main.view.*
 import kotlinx.android.synthetic.main.content_main.*
 import java.util.*
+import java.util.concurrent.TimeUnit
 
 class MainActivity : AppCompatActivity(), ProductDialogFragment.ProductDialogListener, ProductsRecyclerAdapter.ProductsRecyclerAdapterListener {
 
@@ -140,6 +145,10 @@ class MainActivity : AppCompatActivity(), ProductDialogFragment.ProductDialogLis
             // Hide checkboxes
             ProductsRecyclerAdapter.checkMode = false
 
+            // Create notification manager object
+            val notificationManager = this.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+
+
             // Delete items from array of products
             for(i in ProductsRecyclerAdapter.productsToDeleteArray) {
 
@@ -162,6 +171,9 @@ class MainActivity : AppCompatActivity(), ProductDialogFragment.ProductDialogLis
 
                 // Perform deletion for each row
                 rowCounter += dbDeletor.delete(ProductsEntry.TABLE_NAME, selection, arrayOf(i.value.pID.toString()))
+
+                // Delete scheduled notification for each row
+                notificationManager.cancel(i.value.pID.toInt())
 
             }
 
@@ -226,6 +238,9 @@ class MainActivity : AppCompatActivity(), ProductDialogFragment.ProductDialogLis
     */
     override fun onProductEdit(pName: String, pExpiry: Date, pID: Long?) {
 
+        // Create notification manager object
+        val notificationManager = this.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+
         editLoop@ for((counter, i) in productsArray.withIndex()) {
 
             if(i.pID == pID) { // Change record in arrayList
@@ -235,6 +250,21 @@ class MainActivity : AppCompatActivity(), ProductDialogFragment.ProductDialogLis
 
                 // Update adapter
                 recyclerViewAdapter.notifyItemChanged(counter)
+
+                /*
+                    Update notification
+                  */
+                notificationManager.cancel(pID.toInt())
+
+                // Get interval in milis
+                val timeDiff = TimeUnit.MILLISECONDS.toSeconds(pExpiry.time - Calendar.getInstance().timeInMillis)
+
+                val expiryTask = OneTimeWorkRequestBuilder<ExpiryReminderWorker>()
+                        .setInitialDelay(timeDiff, TimeUnit.SECONDS)
+                        .setInputData(Data.Builder().putString("pName", pName).putLong("rowID", pID).build())
+                        .build()
+
+                WorkManager.getInstance().enqueue(expiryTask)
 
                 /*
                  Update DB
@@ -302,9 +332,24 @@ class MainActivity : AppCompatActivity(), ProductDialogFragment.ProductDialogLis
         // Insert new row
         val newRowId = dbWriter?.insert(ProductsEntry.TABLE_NAME, null, values)
 
+        Log.d("DB", "New product ID: $newRowId")
+
         // Add new entry to productsArray
         if(newRowId != null)
             productsArray.add(ProductEntry(newRowId, pName, pExpiry))
+
+        /*
+        REGISTER NOTIFICATION
+         */
+        // Get interval in milis
+        val timeDiff = TimeUnit.MILLISECONDS.toSeconds(pExpiry.time - Calendar.getInstance().timeInMillis)
+
+        val expiryTask = OneTimeWorkRequestBuilder<ExpiryReminderWorker>()
+                .setInitialDelay(timeDiff, TimeUnit.SECONDS)
+                .setInputData(Data.Builder().putString("pName", pName).putLong("rowID", newRowId!!).build())
+                .build()
+
+        WorkManager.getInstance().enqueue(expiryTask)
 
         // Hide empty row notification if it is visible
         if(emptyRowInclude.visibility != View.GONE)

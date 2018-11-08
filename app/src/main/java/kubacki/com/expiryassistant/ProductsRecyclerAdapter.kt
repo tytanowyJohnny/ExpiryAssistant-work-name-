@@ -24,6 +24,7 @@ class ProductsRecyclerAdapter(private val dataSet: ArrayList<ProductEntry>, priv
     companion object {
         var productsToDeleteArray: HashMap<Int, ProductEntry> = HashMap()
         var checkMode = false
+
     }
 
     // Interface used to communicate with Main Activity
